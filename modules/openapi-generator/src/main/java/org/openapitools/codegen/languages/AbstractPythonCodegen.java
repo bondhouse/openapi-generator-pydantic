@@ -78,12 +78,14 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
     private final Logger LOGGER = LoggerFactory.getLogger(AbstractPythonCodegen.class);
 
     public static final String MAP_NUMBER_TO = "mapNumberTo";
+    public static final String MAP_INT_TO = "mapIntTo";
 
     protected String packageName = "openapi_client";
     protected String packageVersion = "1.0.0";
     protected String projectName; // for setup.py, e.g. petstore-api
     protected boolean hasModelsToImport = Boolean.FALSE;
     protected String mapNumberTo = "Union[StrictFloat, StrictInt]";
+    protected String mapIntTo = "StrictInt";
     protected Map<Character, String> regexModifiers;
 
     private Map<String, String> schemaKeyToModelNameCache = new HashMap<>();
@@ -1091,6 +1093,14 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
         }
     }
 
+    public void setMapIntTo(String mapIntTo) {
+        if ("int".equals(mapIntTo) || "StrictInt".equals(mapIntTo)) {
+            this.mapIntTo = mapIntTo;
+        } else {
+            throw new IllegalArgumentException("mapNumberTo value must be int or StrictInt");
+        }
+    }
+
     public String toEnumVariableName(String name, String datatype) {
         if ("int".equals(datatype)) {
             return "NUMBER_" + name.replace("-", "MINUS_");
@@ -1901,10 +1911,18 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
         }
 
         private PythonType intType(IJsonSchemaValidationProperties cp) {
+            PythonType pt = new PythonType("int");
             if (cp.getHasValidation()) {
-                PythonType pt = new PythonType("int");
-                // e.g. conint(ge=10, le=100, strict=True)
-                pt.constrain("strict", true);
+                if ("int".equals(mapIntTo)) {
+                    pt.constrain("strict", false);
+                } else if ("StrictInt".equals(mapNumberTo)) {
+                    pydanticImports.add("StrictInt");
+                    pt.constrain("strict", true);
+                } else {
+                    // redundant condition for sake of being explicit
+                    pydanticImports.add("StrictInt");
+                    pt.constrain("strict", true);
+                }
                 if (cp.getMaximum() != null) {
                     if (cp.getExclusiveMaximum()) {
                         pt.constrain("lt", cp.getMaximum(), false);
@@ -1922,11 +1940,19 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
                 if (cp.getMultipleOf() != null) {
                     pt.constrain("multiple_of", cp.getMultipleOf());
                 }
-                return pt;
             } else {
-                pydanticImports.add("StrictInt");
-                return new PythonType("StrictInt");
+                if ("int".equals(mapIntTo)) {
+                    pt.constrain("strict", false);
+                } else if ("StrictInt".equals(mapNumberTo)) {
+                    pydanticImports.add("StrictInt");
+                    pt.constrain("strict", true);
+                } else {
+                    // redundant condition for sake of being explicit
+                    pydanticImports.add("StrictInt");
+                    pt.constrain("strict", true);
+                }
             }
+            return pt;
         }
 
         private PythonType binaryType(IJsonSchemaValidationProperties cp) {
