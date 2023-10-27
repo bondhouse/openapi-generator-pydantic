@@ -1913,13 +1913,7 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
         private PythonType intType(IJsonSchemaValidationProperties cp) {
             PythonType pt = new PythonType("int");
             if (cp.getHasValidation()) {
-                if ("int".equals(mapIntTo)) {
-                    pt.constrain("strict", false);
-                } else if ("StrictInt".equals(mapNumberTo)) {
-                    pydanticImports.add("StrictInt");
-                    pt.constrain("strict", true);
-                } else {
-                    // redundant condition for sake of being explicit
+                if ("StrictInt".equals(mapNumberTo)) {
                     pydanticImports.add("StrictInt");
                     pt.constrain("strict", true);
                 }
@@ -1941,13 +1935,7 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
                     pt.constrain("multiple_of", cp.getMultipleOf());
                 }
             } else {
-                if ("int".equals(mapIntTo)) {
-                    pt.constrain("strict", false);
-                } else if ("StrictInt".equals(mapNumberTo)) {
-                    pydanticImports.add("StrictInt");
-                    pt.constrain("strict", true);
-                } else {
-                    // redundant condition for sake of being explicit
+                if ("StrictInt".equals(mapNumberTo)) {
                     pydanticImports.add("StrictInt");
                     pt.constrain("strict", true);
                 }
@@ -2265,8 +2253,8 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
                 fields.add(String.format(Locale.ROOT, "example=%s", cp.getExample()));
             }*/
 
-            //return pt.asTypeConstraint(otherImports);
-            return pt.asTypeConstraintWithAnnotations(otherImports);
+            return pt.asTypeConstraint(otherImports);
+            //return pt.asTypeConstraintWithAnnotations(otherImports);
         }
     }
 }
