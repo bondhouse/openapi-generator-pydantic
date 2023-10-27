@@ -144,6 +144,8 @@ public class PythonClientCodegen extends AbstractPythonCodegen implements Codege
         cliOptions.add(new CliOption(RECURSION_LIMIT, "Set the recursion limit. If not set, use the system default value."));
         cliOptions.add(new CliOption(MAP_NUMBER_TO, "Map number to Union[StrictFloat, StrictInt], StrictStr or float.")
                 .defaultValue("Union[StrictFloat, StrictInt]"));
+        cliOptions.add(new CliOption(MAP_INT_TO, "Map int to StrictInt or int.")
+                .defaultValue("StrictInt"));
         cliOptions.add(new CliOption(DATETIME_FORMAT, "datetime format for query parameters")
                 .defaultValue("%Y-%m-%dT%H:%M:%S%z"));
         cliOptions.add(new CliOption(DATE_FORMAT, "date format for query parameters")
@@ -249,6 +251,10 @@ public class PythonClientCodegen extends AbstractPythonCodegen implements Codege
 
         if (additionalProperties.containsKey(MAP_NUMBER_TO)) {
             setMapNumberTo(String.valueOf(additionalProperties.get(MAP_NUMBER_TO)));
+        }
+
+        if (additionalProperties.containsKey(MAP_INT_TO)) {
+            setMapIntTo(String.valueOf(additionalProperties.get(MAP_INT_TO)));
         }
 
         if (additionalProperties.containsKey(DATETIME_FORMAT)) {
